@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Next.js
+frontend/.next/
+frontend/out/
+
+# Production
+backend/dist/
+
+# Environment files
+.env.local
+
+# Vercel
+.vercel/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Test files
+backend/test-all-apis.js
+backend/view-database.js
+backend/remove-duplicates.js
+backend/force-remove-duplicates.js
+backend/start-ngrok-tunnel.ps1

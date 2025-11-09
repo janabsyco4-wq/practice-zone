@@ -1,0 +1,297 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#0A0A0F] text-gray-100;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Professional Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(139, 92, 246, 0.6);
+  }
+}
+
+/* Animation Classes - Optimized */
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out forwards;
+  will-change: transform, opacity;
+}
+
+.animate-fade-in-down {
+  animation: fadeInDown 0.4s ease-out forwards;
+  will-change: transform, opacity;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.4s ease-out forwards;
+  will-change: transform, opacity;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.4s ease-out forwards;
+  will-change: transform, opacity;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out forwards;
+  will-change: transform, opacity;
+}
+
+.shimmer {
+  animation: shimmer 2s infinite linear;
+  background: linear-gradient(
+    90deg,
+    rgba(26, 26, 36, 0) 0%,
+    rgba(36, 36, 58, 0.8) 50%,
+    rgba(26, 26, 36, 0) 100%
+  );
+  background-size: 1000px 100%;
+}
+
+/* Stagger Delays - Reduced */
+.delay-100 { animation-delay: 0.05s; }
+.delay-200 { animation-delay: 0.1s; }
+.delay-300 { animation-delay: 0.15s; }
+.delay-400 { animation-delay: 0.2s; }
+.delay-500 { animation-delay: 0.25s; }
+.delay-600 { animation-delay: 0.3s; }
+
+/* Professional Card Styles - Optimized */
+.card-professional {
+  @apply bg-gradient-to-br from-[#13131A] to-[#1A1A24] border border-[#24243A] rounded-2xl;
+  @apply transition-all duration-200 ease-out;
+  @apply hover:border-purple-500/50 hover:shadow-xl hover:shadow-purple-500/10;
+  @apply hover:-translate-y-1;
+  will-change: transform, box-shadow;
+}
+
+/* Glass Morphism */
+.glass {
+  background: rgba(26, 26, 36, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Gradient Text */
+.text-gradient {
+  background: linear-gradient(135deg, #8B5CF6 0%, #EC4899 50%, #F59E0B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% auto;
+  animation: gradient-shift 3s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% center; }
+  50% { background-position: 100% center; }
+}
+
+/* Button Styles */
+.btn-primary {
+  @apply relative px-8 py-3 bg-gradient-to-r from-purple-600 to-purple-700;
+  @apply text-white font-semibold rounded-xl;
+  @apply transition-all duration-300 ease-out;
+  @apply hover:from-purple-700 hover:to-purple-800;
+  @apply hover:shadow-lg hover:shadow-purple-500/50;
+  @apply hover:scale-105 active:scale-95;
+  @apply focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-[#0A0A0F];
+}
+
+.btn-secondary {
+  @apply relative px-8 py-3 bg-[#1A1A24] border border-[#24243A];
+  @apply text-white font-semibold rounded-xl;
+  @apply transition-all duration-300 ease-out;
+  @apply hover:border-purple-500/50 hover:bg-[#24243A];
+  @apply hover:scale-105 active:scale-95;
+  @apply focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-[#0A0A0F];
+}
+
+/* Input Styles */
+.input-professional {
+  @apply w-full px-4 py-3 bg-[#13131A] border border-[#24243A] rounded-xl;
+  @apply text-white placeholder-gray-500;
+  @apply transition-all duration-300;
+  @apply focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20;
+  @apply hover:border-[#2A2A3A];
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0A0A0F;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #8B5CF6 0%, #7C3AED 100%);
+  border-radius: 6px;
+  border: 2px solid #0A0A0F;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #7C3AED 0%, #6D28D9 100%);
+}
+
+/* Smooth Scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection */
+::selection {
+  background: rgba(139, 92, 246, 0.3);
+  color: white;
+}
+
+/* Loading Skeleton */
+.skeleton {
+  @apply bg-gradient-to-r from-[#13131A] via-[#1A1A24] to-[#13131A];
+  @apply animate-pulse;
+  background-size: 200% 100%;
+}
+
+/* Glow Effects */
+.glow-purple {
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
+}
+
+.glow-purple-hover:hover {
+  box-shadow: 0 0 40px rgba(139, 92, 246, 0.5);
+  transition: box-shadow 0.3s ease;
+}
+
+/* Badge */
+.badge {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold;
+  @apply bg-purple-500/10 text-purple-400 border border-purple-500/20;
+}
+
+/* Divider */
+.divider {
+  @apply h-px bg-gradient-to-r from-transparent via-[#24243A] to-transparent;
+}
+
+/* Focus Visible */
+*:focus-visible {
+  outline: 2px solid #8B5CF6;
+  outline-offset: 2px;
+}
+
+/* Backdrop Blur Support */
+@supports (backdrop-filter: blur(20px)) or (-webkit-backdrop-filter: blur(20px)) {
+  .glass {
+    background: rgba(26, 26, 36, 0.7);
+  }
+}
+
+/* Print Styles */
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .card-professional {
+    border-width: 2px;
+  }
+}
+
+/* Dark Mode (already dark, but for consistency) */
+@media (prefers-color-scheme: dark) {
+  body {
+    color-scheme: dark;
+  }
+}
