@@ -14,6 +14,10 @@ export default function ProductGallery({ images, productName }: ProductGalleryPr
 
   const allImages = images.length > 0 ? images : [images[0]];
 
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    e.currentTarget.src = 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500';
+  };
+
   return (
     <div className="space-y-4">
       {/* Main Image */}
@@ -29,6 +33,7 @@ export default function ProductGallery({ images, productName }: ProductGalleryPr
           className={`object-cover transition-transform duration-300 ${
             isZoomed ? 'scale-150' : 'scale-100'
           }`}
+          onError={handleImageError}
         />
         
         {/* Zoom Indicator */}
@@ -97,6 +102,7 @@ export default function ProductGallery({ images, productName }: ProductGalleryPr
                 fill
                 sizes="100px"
                 className="object-cover"
+                onError={handleImageError}
               />
             </button>
           ))}

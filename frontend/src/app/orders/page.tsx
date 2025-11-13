@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import PageHero from '@/components/PageHero';
 import { api } from '@/lib/api';
 import { getToken, isAuthenticated } from '@/lib/auth';
 
-export default function OrdersPage() {
+function OrdersContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [orders, setOrders] = useState<any[]>([]);
@@ -101,7 +101,7 @@ export default function OrdersPage() {
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <p className="text-white font-semibold mb-1">Order #{order.id.slice(0, 8)}</p>
+                      <p className="text-white font-semibold mb-1">Order #{order.id}</p>
                       <p className="text-gray-400 text-sm">
                         {new Date(order.createdAt).toLocaleDateString('en-US', {
                           year: 'numeric',
@@ -161,5 +161,20 @@ export default function OrdersPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function OrdersPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#0A0A0F]">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+        </div>
+      </div>
+    }>
+      <OrdersContent />
+    </Suspense>
   );
 }

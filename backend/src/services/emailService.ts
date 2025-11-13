@@ -156,7 +156,7 @@ export const sendOrderConfirmationEmail = async (
     <p>Thank you for your order! We've received your payment and are preparing your items for shipment.</p>
     
     <h2>Order Details</h2>
-    <p><strong>Order ID:</strong> <span class="highlight">#${order.id.slice(0, 8)}</span></p>
+    <p><strong>Order ID:</strong> <span class="highlight">#${order.id}</span></p>
     <p><strong>Order Date:</strong> ${new Date(order.createdAt).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
@@ -196,7 +196,7 @@ export const sendOrderConfirmationEmail = async (
     await transporter.sendMail({
       from: `"ShopAI" <${process.env.SMTP_USER}>`,
       to: email,
-      subject: `Order Confirmation - #${order.id.slice(0, 8)}`,
+      subject: `Order Confirmation - #${order.id}`,
       html: getEmailTemplate(content),
     });
     console.log(`✅ Order confirmation email sent to ${email}`);
@@ -247,7 +247,7 @@ export const sendOrderStatusEmail = async (
     <p>${statusInfo.message}</p>
     
     <div style="background-color: #13131a; padding: 20px; margin: 20px 0; border-radius: 8px; border: 1px solid #24243a;">
-      <p><strong>Order ID:</strong> <span class="highlight">#${order.id.slice(0, 8)}</span></p>
+      <p><strong>Order ID:</strong> <span class="highlight">#${order.id}</span></p>
       <p><strong>Status:</strong> <span style="color: #8b5cf6; font-weight: bold;">${newStatus}</span></p>
       <p><strong>Total:</strong> $${order.total.toFixed(2)}</p>
     </div>
@@ -264,7 +264,7 @@ export const sendOrderStatusEmail = async (
     await transporter.sendMail({
       from: `"ShopAI" <${process.env.SMTP_USER}>`,
       to: email,
-      subject: `${statusInfo.emoji} Order Update - #${order.id.slice(0, 8)}`,
+      subject: `${statusInfo.emoji} Order Update - #${order.id}`,
       html: getEmailTemplate(content),
     });
     console.log(`✅ Order status email sent to ${email}`);

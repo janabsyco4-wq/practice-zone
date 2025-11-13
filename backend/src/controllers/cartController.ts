@@ -4,7 +4,7 @@ import prisma from '../config/database';
 
 export const getCart = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user!.id;
+    const userId = parseInt(req.user!.id as any);
 
     let cart = await prisma.cart.findUnique({
       where: { userId },
@@ -19,7 +19,7 @@ export const getCart = async (req: AuthRequest, res: Response) => {
 
     if (!cart) {
       cart = await prisma.cart.create({
-        data: { userId },
+        data: { userId: userId },
         include: {
           items: {
             include: {
@@ -30,8 +30,8 @@ export const getCart = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const total = cart.items.reduce(
-      (sum, item) => sum + item.product.price * item.quantity,
+    const total = (cart as any).items.reduce(
+      (sum: number, item: any) => sum + item.product.price * item.quantity,
       0
     );
 
@@ -44,7 +44,7 @@ export const getCart = async (req: AuthRequest, res: Response) => {
 
 export const addToCart = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user!.id;
+    const userId = parseInt(req.user!.id as any);
     const { productId, quantity } = req.body;
 
     const product = await prisma.product.findUnique({ where: { id: productId } });
@@ -104,7 +104,7 @@ export const updateCartItem = async (req: AuthRequest, res: Response) => {
     const { quantity } = req.body;
 
     const item = await prisma.cartItem.findUnique({
-      where: { id: itemId },
+      where: { id: parseInt(itemId) },
       include: { product: true },
     });
 
@@ -117,7 +117,7 @@ export const updateCartItem = async (req: AuthRequest, res: Response) => {
     }
 
     await prisma.cartItem.update({
-      where: { id: itemId },
+      where: { id: parseInt(itemId) },
       data: { quantity },
     });
 
@@ -133,7 +133,7 @@ export const removeFromCart = async (req: AuthRequest, res: Response) => {
     const { itemId } = req.params;
 
     await prisma.cartItem.delete({
-      where: { id: itemId },
+      where: { id: parseInt(itemId) },
     });
 
     res.json({ message: 'Item removed from cart' });
@@ -145,7 +145,7 @@ export const removeFromCart = async (req: AuthRequest, res: Response) => {
 
 export const clearCart = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user!.id;
+    const userId = parseInt(req.user!.id as any);
 
     const cart = await prisma.cart.findUnique({ where: { userId } });
     if (cart) {

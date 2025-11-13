@@ -9,9 +9,14 @@ frontend/out/
 backend/dist/
 
 # Environment files
+.env
 .env.local
+.env.production
 backend/.env
+backend/.env.local
 frontend/.env
+frontend/.env.local
+frontend/.env.production
 
 # Vercel
 .vercel/
@@ -26,3 +31,16 @@ backend/view-database.js
 backend/remove-duplicates.js
 backend/force-remove-duplicates.js
 backend/start-ngrok-tunnel.ps1
+
+# Database files
+backend/prisma/dev.db
+backend/prisma/dev.db-journal
+*.db
+*.db-journal
+
+# Cloudflare
+cloudflared.exe
+cloudflared
+
+# Sensitive credentials
+LOGIN_CREDENTIALS.md

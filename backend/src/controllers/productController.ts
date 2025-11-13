@@ -34,7 +34,7 @@ export const getProductById = async (req: Request, res: Response) => {
     const { id } = req.params;
 
     const product = await prisma.product.findUnique({
-      where: { id },
+      where: { id: parseInt(id) },
     });
 
     if (!product) {
@@ -60,9 +60,9 @@ export const searchProducts = async (req: Request, res: Response) => {
       where: {
         isActive: true,
         OR: [
-          { name: { contains: q as string, mode: 'insensitive' } },
-          { description: { contains: q as string, mode: 'insensitive' } },
-          { category: { contains: q as string, mode: 'insensitive' } },
+          { name: { contains: q as string } },
+          { description: { contains: q as string } },
+          { category: { contains: q as string } },
         ],
       },
     });
@@ -102,7 +102,7 @@ export const updateProduct = async (req: Request, res: Response) => {
     const { name, description, price, image, category, stock, isActive } = req.body;
 
     const product = await prisma.product.update({
-      where: { id },
+      where: { id: parseInt(id) },
       data: {
         name,
         description,
@@ -126,7 +126,7 @@ export const deleteProduct = async (req: Request, res: Response) => {
     const { id } = req.params;
 
     await prisma.product.update({
-      where: { id },
+      where: { id: parseInt(id) },
       data: { isActive: false },
     });
 

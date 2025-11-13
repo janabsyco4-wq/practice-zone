@@ -4,7 +4,7 @@ import prisma from '../config/database';
 
 export const createOrder = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user!.id;
+    const userId = parseInt(req.user!.id as any);
     const { shippingAddress, stripePaymentId } = req.body;
 
     const cart = await prisma.cart.findUnique({
@@ -16,7 +16,7 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
           },
         },
       },
-    });
+    }) as any;
 
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ error: 'Cart is empty' });
@@ -32,7 +32,7 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
     }
 
     const total = cart.items.reduce(
-      (sum, item) => sum + item.product.price * item.quantity,
+      (sum: number, item: any) => sum + item.product.price * item.quantity,
       0
     );
 
@@ -44,7 +44,7 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
         shippingAddress,
         stripePaymentId,
         items: {
-          create: cart.items.map((item) => ({
+          create: cart.items.map((item: any) => ({
             productId: item.productId,
             quantity: item.quantity,
             price: item.product.price,
@@ -106,7 +106,7 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
 
 export const getUserOrders = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user!.id;
+    const userId = parseInt(req.user!.id as any);
 
     const orders = await prisma.order.findMany({
       where: { userId },
@@ -130,11 +130,11 @@ export const getUserOrders = async (req: AuthRequest, res: Response) => {
 export const getOrderById = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const userId = req.user!.id;
+    const userId = parseInt(req.user!.id as any);
     const isAdmin = req.user!.role === 'ADMIN';
 
     const order = await prisma.order.findUnique({
-      where: { id },
+      where: { id: parseInt(id) },
       include: {
         items: {
           include: {
@@ -207,11 +207,11 @@ export const updateOrderStatus = async (req: AuthRequest, res: Response) => {
     const { status } = req.body;
 
     // Get old status
-    const oldOrder = await prisma.order.findUnique({ where: { id } });
+    const oldOrder = await prisma.order.findUnique({ where: { id: parseInt(id) } });
     const oldStatus = oldOrder?.status;
 
     const order = await prisma.order.update({
-      where: { id },
+      where: { id: parseInt(id) },
       data: { status },
       include: {
         items: {

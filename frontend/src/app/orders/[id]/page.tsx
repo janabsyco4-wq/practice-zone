@@ -62,7 +62,7 @@ export default function OrderDetailPage() {
       
       <PageHero 
         title="Order Details"
-        subtitle={`Order #${order?.id.slice(0, 8)}`}
+        subtitle={`Order #${order?.id}`}
         gradient="blue"
         size="small"
       />
@@ -85,7 +85,7 @@ export default function OrderDetailPage() {
           <div className="lg:col-span-2 space-y-6">
             {/* Order Summary */}
             <div className="bg-dark-800 rounded-xl p-6 border border-dark-600">
-              <h2 className="text-2xl font-bold text-white mb-4">Order #{order.id.slice(0, 8)}</h2>
+              <h2 className="text-2xl font-bold text-white mb-4">Order #{order.id}</h2>
               
               <div className="space-y-4">
                 {order.items.map((item: any) => (

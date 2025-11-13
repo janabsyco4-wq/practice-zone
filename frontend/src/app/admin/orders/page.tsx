@@ -112,7 +112,7 @@ export default function AdminOrdersPage() {
               <div key={order.id} className="bg-dark-800 rounded-xl p-6 border border-dark-600">
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <p className="text-white font-semibold mb-1">Order #{order.id.slice(0, 8)}</p>
+                    <p className="text-white font-semibold mb-1">Order #{order.id}</p>
                     <p className="text-gray-400 text-sm">
                       {new Date(order.createdAt).toLocaleDateString('en-US', {
                         year: 'numeric',

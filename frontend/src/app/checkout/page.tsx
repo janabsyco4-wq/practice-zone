@@ -3,7 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
-import StripeCheckout from '@/components/StripeCheckout';
+import Footer from '@/components/Footer';
+import PageHero from '@/components/PageHero';
+import JazzCashPayment from '@/components/JazzCashPayment';
 import { api } from '@/lib/api';
 import { getToken, isAuthenticated } from '@/lib/auth';
 
@@ -11,11 +13,16 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [cart, setCart] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [processing, setProcessing] = useState(false);
-  const [shippingAddress, setShippingAddress] = useState('');
-  const [error, setError] = useState('');
-  const [clientSecret, setClientSecret] = useState('');
-  const [showPayment, setShowPayment] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [order, setOrder] = useState<any>(null);
+  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'jazzcash'>('jazzcash');
+  const [shippingAddress, setShippingAddress] = useState({
+    street: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    country: 'Pakistan',
+  });
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -23,16 +30,13 @@ export default function CheckoutPage() {
       return;
     }
     loadCart();
-  }, []);
+  }, [router]);
 
   const loadCart = async () => {
     try {
-      const token = getToken()!;
+      const token = getToken();
+      if (!token) return;
       const data = await api.getCart(token);
-      if (!data.items || data.items.length === 0) {
-        router.push('/cart');
-        return;
-      }
       setCart(data);
     } catch (error) {
       console.error('Failed to load cart:', error);
@@ -41,44 +45,28 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleContinueToPayment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setProcessing(true);
+  const handleCreateOrder = async () => {
+    if (!shippingAddress.street || !shippingAddress.city || !shippingAddress.zipCode) {
+      alert('Please fill in all shipping address fields');
+      return;
+    }
 
+    setCreating(true);
     try {
       const token = getToken()!;
-      const { clientSecret } = await api.createPaymentIntent(token, cart.total);
-      setClientSecret(clientSecret);
-      setShowPayment(true);
-    } catch (err) {
-      setError('Failed to initialize payment. Please try again.');
+      const newOrder = await api.createOrder(token, shippingAddress);
+      setOrder(newOrder);
+    } catch (error) {
+      console.error('Failed to create order:', error);
+      alert('Failed to create order. Please try again.');
     } finally {
-      setProcessing(false);
+      setCreating(false);
     }
-  };
-
-  const handlePaymentSuccess = async (paymentIntentId: string) => {
-    setProcessing(true);
-    try {
-      const token = getToken()!;
-      await api.createOrder(token, { shippingAddress, stripePaymentId: paymentIntentId });
-      router.push('/orders?success=true');
-    } catch (err) {
-      setError('Payment succeeded but order creation failed. Please contact support.');
-    } finally {
-      setProcessing(false);
-    }
-  };
-
-  const handlePaymentError = (errorMessage: string) => {
-    setError(errorMessage);
-    setShowPayment(false);
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-dark-900">
+      <div className="min-h-screen bg-[#0A0A0F]">
         <Navbar />
         <div className="flex items-center justify-center min-h-screen">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
@@ -87,107 +75,222 @@ export default function CheckoutPage() {
     );
   }
 
+  if (!cart || !cart.items || cart.items.length === 0) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0F]">
+        <Navbar />
+        <PageHero title="Checkout" subtitle="Complete your purchase" gradient="purple" size="small" />
+        <div className="max-w-7xl mx-auto px-6 py-12 text-center">
+          <p className="text-gray-400 mb-6">Your cart is empty</p>
+          <button
+            onClick={() => router.push('/products')}
+            className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg"
+          >
+            Browse Products
+          </button>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-dark-900">
+    <div className="min-h-screen bg-[#0A0A0F]">
       <Navbar />
-      
-      <div className="max-w-4xl mx-auto px-6 pt-24 pb-12">
-        <h1 className="text-4xl font-bold text-white mb-8">Checkout</h1>
+      <PageHero title="Checkout" subtitle="Complete your purchase" gradient="purple" size="small" />
 
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Shipping Form / Payment */}
-          <div className="bg-dark-800 rounded-xl p-6 border border-dark-600">
-            {!showPayment ? (
-              <>
-                <h2 className="text-2xl font-bold text-white mb-6">Shipping Information</h2>
-                
-                <form onSubmit={handleContinueToPayment} className="space-y-4">
-                  {error && (
-                    <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded-lg">
-                      {error}
-                    </div>
-                  )}
-
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Left Column - Shipping & Payment */}
+          <div className="space-y-6">
+            {/* Shipping Address */}
+            {!order && (
+              <div className="bg-[#13131A]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+                <h2 className="text-2xl font-bold text-white mb-6">Shipping Address</h2>
+                <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Full Address
+                      Street Address
                     </label>
-                    <textarea
-                      required
-                      rows={4}
-                      value={shippingAddress}
-                      onChange={(e) => setShippingAddress(e.target.value)}
-                      className="w-full px-4 py-3 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:border-purple-500"
-                      placeholder="123 Main St, City, State 12345"
+                    <input
+                      type="text"
+                      value={shippingAddress.street}
+                      onChange={(e) => setShippingAddress({ ...shippingAddress, street: e.target.value })}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all"
+                      placeholder="123 Main Street"
                     />
                   </div>
-
-                  <button
-                    type="submit"
-                    disabled={processing}
-                    className="w-full py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-purple-800 transition-all disabled:opacity-50"
-                  >
-                    {processing ? 'Loading...' : 'Continue to Payment'}
-                  </button>
-                </form>
-              </>
-            ) : (
-              <>
-                <h2 className="text-2xl font-bold text-white mb-6">Payment Details</h2>
-                
-                {error && (
-                  <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded-lg mb-4">
-                    {error}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">City</label>
+                      <input
+                        type="text"
+                        value={shippingAddress.city}
+                        onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all"
+                        placeholder="Karachi"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">State/Province</label>
+                      <input
+                        type="text"
+                        value={shippingAddress.state}
+                        onChange={(e) => setShippingAddress({ ...shippingAddress, state: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all"
+                        placeholder="Sindh"
+                      />
+                    </div>
                   </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">ZIP Code</label>
+                      <input
+                        type="text"
+                        value={shippingAddress.zipCode}
+                        onChange={(e) => setShippingAddress({ ...shippingAddress, zipCode: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all"
+                        placeholder="75500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Country</label>
+                      <input
+                        type="text"
+                        value={shippingAddress.country}
+                        onChange={(e) => setShippingAddress({ ...shippingAddress, country: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all"
+                        placeholder="Pakistan"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Payment Method Selection */}
+            {order && (
+              <div className="bg-[#13131A]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+                <h2 className="text-2xl font-bold text-white mb-6">Select Payment Method</h2>
+                <div className="space-y-3 mb-6">
+                  <button
+                    onClick={() => setPaymentMethod('jazzcash')}
+                    className={`w-full p-4 rounded-lg border-2 transition-all ${
+                      paymentMethod === 'jazzcash'
+                        ? 'border-orange-500 bg-orange-500/10'
+                        : 'border-white/10 bg-white/5 hover:border-white/20'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-orange-500 rounded-lg flex items-center justify-center">
+                        <span className="text-white font-bold text-sm">JC</span>
+                      </div>
+                      <div className="text-left">
+                        <div className="text-white font-semibold">JazzCash</div>
+                        <div className="text-xs text-gray-400">Pay with JazzCash Mobile Account</div>
+                      </div>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => setPaymentMethod('stripe')}
+                    className={`w-full p-4 rounded-lg border-2 transition-all ${
+                      paymentMethod === 'stripe'
+                        ? 'border-purple-500 bg-purple-500/10'
+                        : 'border-white/10 bg-white/5 hover:border-white/20'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
+                        <span className="text-white font-bold text-sm">💳</span>
+                      </div>
+                      <div className="text-left">
+                        <div className="text-white font-semibold">Credit/Debit Card</div>
+                        <div className="text-xs text-gray-400">Pay with Stripe (International)</div>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+
+                {/* Payment Component */}
+                {paymentMethod === 'jazzcash' && (
+                  <JazzCashPayment
+                    orderId={order.id}
+                    amount={order.total}
+                    onSuccess={() => console.log('Payment initiated')}
+                    onError={(error) => alert(error)}
+                  />
                 )}
 
-                <StripeCheckout
-                  clientSecret={clientSecret}
-                  amount={cart.total}
-                  onSuccess={handlePaymentSuccess}
-                  onError={handlePaymentError}
-                />
-
-                <button
-                  onClick={() => setShowPayment(false)}
-                  className="w-full mt-4 py-3 bg-dark-700 text-white rounded-lg font-semibold hover:bg-dark-600 transition-all"
-                >
-                  Back to Shipping
-                </button>
-              </>
+                {paymentMethod === 'stripe' && (
+                  <div className="bg-white/5 border border-white/10 rounded-lg p-6 text-center">
+                    <p className="text-gray-400 mb-4">Stripe payment integration</p>
+                    <button className="px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg font-semibold">
+                      Pay with Stripe
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
 
-          {/* Order Summary */}
-          <div className="bg-dark-800 rounded-xl p-6 border border-dark-600">
-            <h2 className="text-2xl font-bold text-white mb-6">Order Summary</h2>
-            
-            <div className="space-y-4 mb-6">
-              {cart?.items.map((item: any) => (
-                <div key={item.id} className="flex justify-between text-gray-300">
-                  <span>{item.product.name} x {item.quantity}</span>
-                  <span>${(item.product.price * item.quantity).toFixed(2)}</span>
-                </div>
-              ))}
-            </div>
+          {/* Right Column - Order Summary */}
+          <div>
+            <div className="bg-[#13131A]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 sticky top-24">
+              <h2 className="text-2xl font-bold text-white mb-6">Order Summary</h2>
 
-            <div className="border-t border-dark-600 pt-4 space-y-2">
-              <div className="flex justify-between text-gray-300">
-                <span>Subtotal</span>
-                <span>${cart?.total.toFixed(2)}</span>
+              {/* Cart Items */}
+              <div className="space-y-3 mb-6 max-h-64 overflow-y-auto">
+                {cart.items.map((item: any) => (
+                  <div key={item.id} className="flex gap-3 p-3 bg-white/5 rounded-lg">
+                    <div className="w-16 h-16 bg-white/10 rounded-lg flex-shrink-0"></div>
+                    <div className="flex-1">
+                      <div className="text-white font-medium text-sm">{item.product.name}</div>
+                      <div className="text-gray-400 text-xs">Qty: {item.quantity}</div>
+                    </div>
+                    <div className="text-white font-semibold">${(item.product.price * item.quantity).toFixed(2)}</div>
+                  </div>
+                ))}
               </div>
-              <div className="flex justify-between text-gray-300">
-                <span>Shipping</span>
-                <span>Free</span>
+
+              {/* Totals */}
+              <div className="space-y-3 border-t border-white/10 pt-4 mb-6">
+                <div className="flex justify-between text-gray-300">
+                  <span>Subtotal</span>
+                  <span>${cart.total.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-gray-300">
+                  <span>Shipping</span>
+                  <span className="text-green-400">Free</span>
+                </div>
+                <div className="flex justify-between text-white text-lg font-bold border-t border-white/10 pt-3">
+                  <span>Total</span>
+                  <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    ${cart.total.toFixed(2)}
+                  </span>
+                </div>
               </div>
-              <div className="flex justify-between text-white text-xl font-bold">
-                <span>Total</span>
-                <span>${cart?.total.toFixed(2)}</span>
-              </div>
+
+              {/* Action Button */}
+              {!order ? (
+                <button
+                  onClick={handleCreateOrder}
+                  disabled={creating}
+                  className="w-full py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300 disabled:opacity-50"
+                >
+                  {creating ? 'Creating Order...' : 'Continue to Payment'}
+                </button>
+              ) : (
+                <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4 text-center">
+                  <div className="text-green-400 font-semibold mb-1">Order Created!</div>
+                  <div className="text-gray-400 text-sm">Order #{order.id}</div>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }

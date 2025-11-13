@@ -92,7 +92,9 @@ export default function ProductDetailPage() {
         <div className="grid md:grid-cols-2 gap-12">
           {/* Product Gallery */}
           <ProductGallery 
-            images={product.images && product.images.length > 0 ? product.images : [product.image]} 
+            images={product.images && typeof product.images === 'string' && product.images.trim() !== '' 
+              ? product.images.split(',').map((img: string) => img.trim()) 
+              : [product.image]} 
             productName={product.name}
           />
 

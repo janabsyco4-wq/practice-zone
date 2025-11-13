@@ -13,8 +13,11 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 8; // Reduced to 8 for maximum speed
 
   useEffect(() => {
+    setCurrentPage(1);
     loadProducts();
   }, [category]);
 
@@ -32,6 +35,7 @@ export default function ProductsPage() {
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
+    setCurrentPage(1);
     if (!searchQuery.trim()) {
       loadProducts();
       return;
@@ -70,35 +74,35 @@ export default function ProductsPage() {
         </div>
 
         {/* Stats Banner */}
-        <div className="mb-12 grid grid-cols-2 md:grid-cols-4 gap-4 animate-fade-in-up delay-100">
-          <div className="bg-[#13131A]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center hover:border-white/20 transition-all">
-            <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">
+        <div className="mb-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="bg-[#13131A] border border-white/10 rounded-xl p-4 text-center">
+            <div className="text-2xl font-bold text-purple-400 mb-1">
               {products.length}+
             </div>
-            <div className="text-sm text-gray-400">Products Available</div>
+            <div className="text-xs text-gray-400">Products</div>
           </div>
-          <div className="bg-[#13131A]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center hover:border-white/20 transition-all">
-            <div className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-2">
+          <div className="bg-[#13131A] border border-white/10 rounded-xl p-4 text-center">
+            <div className="text-2xl font-bold text-blue-400 mb-1">
               Free
             </div>
-            <div className="text-sm text-gray-400">Shipping</div>
+            <div className="text-xs text-gray-400">Shipping</div>
           </div>
-          <div className="bg-[#13131A]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center hover:border-white/20 transition-all">
-            <div className="text-3xl font-bold bg-gradient-to-r from-pink-400 to-orange-400 bg-clip-text text-transparent mb-2">
+          <div className="bg-[#13131A] border border-white/10 rounded-xl p-4 text-center">
+            <div className="text-2xl font-bold text-pink-400 mb-1">
               24/7
             </div>
-            <div className="text-sm text-gray-400">Support</div>
+            <div className="text-xs text-gray-400">Support</div>
           </div>
-          <div className="bg-[#13131A]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center hover:border-white/20 transition-all">
-            <div className="text-3xl font-bold bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent mb-2">
+          <div className="bg-[#13131A] border border-white/10 rounded-xl p-4 text-center">
+            <div className="text-2xl font-bold text-green-400 mb-1">
               100%
             </div>
-            <div className="text-sm text-gray-400">Secure</div>
+            <div className="text-xs text-gray-400">Secure</div>
           </div>
         </div>
 
         {/* Search & Filters */}
-        <div className="mb-8 flex flex-col md:flex-row gap-4 animate-fade-in-up delay-200">
+        <div className="mb-8 flex flex-col md:flex-row gap-4">
           <form onSubmit={handleSearch} className="flex-1 relative group">
             <input
               type="text"
@@ -138,14 +142,17 @@ export default function ProductsPage() {
           >
             <option value="">All Categories</option>
             <option value="Electronics">Electronics</option>
+            <option value="Fashion">Fashion</option>
+            <option value="Home">Home & Living</option>
+            <option value="Sports">Sports & Fitness</option>
             <option value="Accessories">Accessories</option>
           </select>
         </div>
 
         {/* Products Grid */}
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
               <div key={i} className="bg-[#13131A]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-4 animate-pulse">
                 <div className="aspect-square bg-white/5 rounded-xl mb-4"></div>
                 <div className="h-4 bg-white/5 rounded mb-2"></div>
@@ -180,17 +187,50 @@ export default function ProductsPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-              {products.map((product: any, index: number) => (
-                <div 
-                  key={product.id} 
-                  className="animate-fade-in-up"
-                  style={{ animationDelay: `${Math.min(index * 50, 500)}ms` }}
-                >
-                  <ProductCard product={product} />
-                </div>
-              ))}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {products
+                .slice((currentPage - 1) * productsPerPage, currentPage * productsPerPage)
+                .map((product: any) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
             </div>
+
+            {/* Pagination */}
+            {products.length > productsPerPage && (
+              <div className="mt-12 flex justify-center items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 bg-[#13131A]/80 border border-white/10 rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/5 transition-all"
+                >
+                  Previous
+                </button>
+                
+                <div className="flex gap-2">
+                  {Array.from({ length: Math.ceil(products.length / productsPerPage) }, (_, i) => i + 1).map(page => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-4 py-2 rounded-lg transition-all ${
+                        currentPage === page
+                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                          : 'bg-[#13131A]/80 border border-white/10 text-white hover:bg-white/5'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(Math.ceil(products.length / productsPerPage), p + 1))}
+                  disabled={currentPage === Math.ceil(products.length / productsPerPage)}
+                  className="px-4 py-2 bg-[#13131A]/80 border border-white/10 rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/5 transition-all"
+                >
+                  Next
+                </button>
+              </div>
+            )}
 
             {/* Bottom CTA Section */}
             <div className="mt-16 relative overflow-hidden rounded-3xl">
